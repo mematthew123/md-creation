@@ -1,8 +1,4 @@
-/**
- * Reads the site's own sitemap.xml and returns the site paths of its Source
- * Pages. Only the pathname is kept: pages are always fetched from the
- * canonical site origin, never from whatever host the sitemap advertises.
- */
+/** Returns site paths from sitemap.xml; only the pathname is kept, never the advertised host. */
 export async function fetchSitemapPaths(site: string): Promise<string[]> {
   const res = await fetch(`${site}/sitemap.xml`, {
     cache: "no-store",
@@ -32,7 +28,7 @@ function normalizePath(loc: string): string | null {
   }
 }
 
-/** Recursion and noise guard: never ingest markdown output, API or asset routes. */
+/** Never ingest our own markdown output or API/asset routes. */
 function isIngestable(path: string): boolean {
   if (/\.md$/i.test(path)) return false;
   if (path.startsWith("/api/") || path.startsWith("/_next/") || path.startsWith("/md/")) return false;

@@ -11,8 +11,6 @@ export default defineConfig({
   projectId: '5ouc347b',
   dataset: 'production',
 
-  // contextPlugin registers the `sanity.agentContext` document type that turns
-  // the dataset into a read-only MCP endpoint for agents (Sanity Context).
   plugins: [structureTool(), visionTool(), contextPlugin()],
 
   schema: {

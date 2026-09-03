@@ -1,13 +1,12 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
-/** Constant-time string comparison that does not leak length. */
+/** Constant-time compare; hashing first hides length. */
 export function safeEqual(a: string, b: string): boolean {
   const ha = createHash("sha256").update(a).digest();
   const hb = createHash("sha256").update(b).digest();
   return timingSafeEqual(ha, hb);
 }
 
-/** True when the request carries `Authorization: Bearer <secret>`. */
 export function verifyBearer(request: Request, secret: string | undefined): boolean {
   if (!secret) return false;
   const header = request.headers.get("authorization") ?? "";
@@ -16,10 +15,7 @@ export function verifyBearer(request: Request, secret: string | undefined): bool
   return safeEqual(match[1].trim(), secret);
 }
 
-/**
- * Vercel signs webhook bodies with HMAC-SHA1 of the raw body using the
- * webhook secret and sends the hex digest in `x-vercel-signature`.
- */
+/** `x-vercel-signature` is HMAC-SHA1 (hex) of the raw body. */
 export function verifyVercelSignature(
   rawBody: string,
   signature: string | null,
