@@ -8,6 +8,7 @@ export const SITE_PAGES: SitePage[] = [
   { path: "/", mdPath: "/index.md" },
   { path: "/about", mdPath: "/about.md" },
   { path: "/pricing", mdPath: "/pricing.md" },
+  { path: "/contact", mdPath: "/contact.md" },
 ];
 
 export function siteUrl(): string {

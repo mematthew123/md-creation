@@ -5,6 +5,7 @@ const LABELS: Record<string, string> = {
   "/": "Home",
   "/about": "About",
   "/pricing": "Pricing",
+  "/contact": "Contact",
 };
 
 export function SiteHeader() {
