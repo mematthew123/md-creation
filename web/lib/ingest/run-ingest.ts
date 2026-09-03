@@ -14,25 +14,17 @@ export type IngestSummary = {
   updated: string[];
   skipped: string[];
   deleted: string[];
-  /** Pages whose frontmatter had to be restored after the model altered it. */
   repaired: string[];
-  /** Id of the Sanity Context document kept in sync with the page index. */
   agentContextId?: string;
   errors: { path: string; message: string }[];
 };
 
-/**
- * One Ingest Run: read the sitemap, refresh every Markdown Page whose Source
- * Page changed, and delete Markdown Pages whose Source Page left the sitemap.
- * Markdown Pages are transformed and written by Sanity Agent Actions (see
- * agent-actions.ts); only deletion uses a plain mutation because Agent
- * Actions have no delete operation. Writes go to published documents.
- */
 export type IngestOptions = {
-  /** Rewrite every page even when its Source Hash is unchanged (e.g. after a converter change). */
+  /** Rewrite pages even when the source hash is unchanged. */
   force?: boolean;
 };
 
+/** Sitemap -> extract -> Agent Actions write; stale pages deleted. */
 export async function runIngest(options: IngestOptions = {}): Promise<IngestSummary> {
   const site = siteUrl();
   const summary: IngestSummary = {
@@ -57,7 +49,7 @@ export async function runIngest(options: IngestOptions = {}): Promise<IngestSumm
     }
   }
 
-  // The sitemap is the source of truth: anything not in it is gone.
+  // Agent Actions cannot delete, so this stays a plain mutation.
   const staleIds = await writeClient.fetch<string[]>(MARKDOWN_PAGE_STALE_IDS, { paths });
   if (staleIds.length > 0) {
     const tx = writeClient.transaction();
@@ -66,7 +58,6 @@ export async function runIngest(options: IngestOptions = {}): Promise<IngestSumm
     summary.deleted.push(...staleIds);
   }
 
-  // Keep the Sanity Context document's instructions in step with the page index.
   try {
     summary.agentContextId = await syncAgentContext(site);
   } catch (err) {
@@ -87,8 +78,7 @@ async function ingestPath(
   options: IngestOptions,
 ): Promise<void> {
   const sourceUrl = `${site}${path}`;
-  // Ask for HTML explicitly so the Accept-header rewrite can never hand the
-  // ingest run its own markdown output.
+  // Explicit Accept so the markdown rewrite never feeds us our own output.
   const res = await fetch(sourceUrl, {
     cache: "no-store",
     headers: { Accept: "text/html", "User-Agent": INGEST_USER_AGENT },

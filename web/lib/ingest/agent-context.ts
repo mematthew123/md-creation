@@ -2,13 +2,7 @@ import { writeClient } from "@/lib/sanity/client";
 import { MARKDOWN_PAGE_LIST, type MarkdownPageListItem } from "@/lib/sanity/queries";
 import { mdUrlFor } from "@/lib/site";
 
-/**
- * Sanity Context: a published `sanity.agentContext` document turns the dataset
- * into a read-only MCP endpoint scoped by `groqFilter`. The ingest run keeps
- * one such document in sync so its `instructions` (returned by the
- * `/initial-context` endpoint) always carry the current index of Markdown
- * Pages, like an auto-maintained llms.txt.
- */
+// Sanity Context doc: read-only MCP endpoint whose instructions carry the page index.
 export const AGENT_CONTEXT_TYPE = "sanity.agentContext";
 export const AGENT_CONTEXT_SLUG = "site-pages";
 export const AGENT_CONTEXT_GROQ_FILTER = '_type == "markdownPage"';
@@ -50,7 +44,6 @@ export function buildInstructions(site: string, pages: MarkdownPageListItem[]): 
   ].join("\n");
 }
 
-/** Creates or updates the Context document. Returns the document id. */
 export async function syncAgentContext(site: string): Promise<string> {
   const pages = await writeClient.fetch<MarkdownPageListItem[]>(MARKDOWN_PAGE_LIST);
   const instructions = buildInstructions(site, pages);

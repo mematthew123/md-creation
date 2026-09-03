@@ -5,10 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-/**
- * Manual trigger: `curl -X POST -H "Authorization: Bearer $INGEST_SECRET" /api/ingest`.
- * Add `?force=1` to rewrite every page regardless of Source Hash.
- */
+/** Manual trigger; `?force=1` rewrites every page. */
 export async function POST(request: Request) {
   if (!verifyBearer(request, process.env.INGEST_SECRET)) {
     return Response.json({ error: "unauthorized" }, { status: 401 });

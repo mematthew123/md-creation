@@ -12,14 +12,12 @@ export function markdownResponse(body: string, status = 200): Response {
     status,
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
-      // HTML and markdown share the canonical URL; caches must key on Accept.
       Vary: "Accept",
       "Cache-Control": "no-store",
     },
   });
 }
 
-/** Serves the Markdown Page for a site path, or a markdown-formatted 404. */
 export async function markdownPageResponse(path: string): Promise<Response> {
   const doc = await readClient.fetch<Pick<MarkdownPageDoc, "markdown"> | null>(
     MARKDOWN_PAGE_BY_PATH,
@@ -34,7 +32,6 @@ export async function markdownPageResponse(path: string): Promise<Response> {
   return markdownResponse(doc.markdown);
 }
 
-/** `/sitemap.md`: every published Markdown Page with its Markdown URL. */
 export async function sitemapMarkdownResponse(): Promise<Response> {
   const site = siteUrl();
   const pages = await readClient.fetch<MarkdownPageListItem[]>(MARKDOWN_PAGE_LIST);

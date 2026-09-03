@@ -14,12 +14,7 @@ type VercelWebhook = {
   };
 };
 
-/**
- * Vercel account webhook. Runs an Ingest Run after a production deployment of
- * this project is live. `deployment.promoted` fires once the production alias
- * points at the new deployment; `deployment.succeeded` with target=production
- * is accepted too, and the hash check makes a duplicate run a no-op.
- */
+/** Vercel webhook: ingest after a production deploy. Duplicate runs are no-ops via hash. */
 export async function POST(request: Request) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-vercel-signature");

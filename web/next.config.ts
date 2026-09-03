@@ -2,8 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Point Next.js at the monorepo root so it traces files and resolves the
-  // single root lockfile correctly instead of guessing.
+  // Monorepo root: single lockfile lives there.
   turbopack: {
     root: path.join(__dirname, ".."),
   },
@@ -11,8 +10,7 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     return {
-      // Content negotiation: the canonical URL serves markdown when asked for it.
-      // beforeFiles so it wins over the HTML page at the same path.
+      // Accept: text/markdown -> markdown handler (beforeFiles to beat the HTML page).
       beforeFiles: [
         {
           source: "/:path*",
@@ -20,9 +18,7 @@ const nextConfig: NextConfig = {
           destination: "/md/:path*",
         },
       ],
-      // Explicit, shareable Markdown URLs. afterFiles so app/sitemap.md wins first.
-      // The negative lookahead keeps a request already rewritten to /md/... from
-      // being rewritten a second time (e.g. /sitemap.md with Accept: text/markdown).
+      // /slug.md -> markdown handler; lookahead avoids rewriting /md/... twice.
       afterFiles: [
         {
           source: "/:path((?!md/).*)\\.md",

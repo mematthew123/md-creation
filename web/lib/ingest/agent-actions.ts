@@ -1,25 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { agentClient } from "@/lib/sanity/client";
 
-/**
- * Sanity Agent Actions is the sole transformer and writer of Markdown Pages on
- * this branch. Two actions are used:
- *
- * - `patch`: deterministic, no LLM. Writes the exact metadata fields (title,
- *   description, path, sourceUrl, sourceHash, ingestedAt).
- * - `generate`: schema-aware LLM instruction that converts the extracted HTML
- *   into the `markdown` field. `target.path` limits the model to that field.
- *
- * `forcePublishedWrite: true` makes both write to the published document id
- * instead of a draft, which matches the auto-publish decision.
- */
+// Agent Actions write Markdown Pages: `patch` sets metadata deterministically,
+// `generate` writes the `markdown` field. forcePublishedWrite skips drafts.
 export const SCHEMA_ID = process.env.SANITY_SCHEMA_ID ?? "_.schemas.default";
 
-/**
- * Metadata fields are `readOnly: () => true` in the schema (locked in the
- * Studio). Agent Actions skip conditional read-only fields unless the request
- * opts back in, which is what this does.
- */
+// Metadata fields are `readOnly: () => true` in the schema; opt back in per request.
 const CONDITIONAL_PATHS = { defaultReadOnly: false, defaultHidden: false } as const;
 
 export type MarkdownPageMetadata = {
@@ -40,7 +26,7 @@ export type Frontmatter = {
   source_hash: string;
 };
 
-/** YAML frontmatter block; values are JSON-encoded, which is valid YAML. */
+/** JSON-encoded values are valid YAML scalars. */
 export function renderFrontmatter(frontmatter: Frontmatter): string {
   const lines = (Object.keys(frontmatter) as (keyof Frontmatter)[]).map(
     (key) => `${key}: ${JSON.stringify(frontmatter[key])}`,
@@ -67,11 +53,9 @@ type ConvertInput = {
 
 export type ConvertResult = {
   _id: string;
-  /** True when the model dropped the frontmatter and a deterministic patch restored it. */
   repaired: boolean;
 };
 
-/** Creates a new published Markdown Page: metadata via initialValues, markdown via generate. */
 export async function createMarkdownPage(input: ConvertInput): Promise<ConvertResult> {
   const _id = randomUUID();
   const doc = await agentClient.agent.action.generate<
@@ -98,7 +82,6 @@ export async function createMarkdownPage(input: ConvertInput): Promise<ConvertRe
   return { _id: doc._id, repaired };
 }
 
-/** Updates an existing published Markdown Page: metadata via patch, markdown via generate. */
 export async function updateMarkdownPage(
   documentId: string,
   input: ConvertInput,
@@ -132,11 +115,7 @@ export async function updateMarkdownPage(
   return { _id: doc._id, repaired };
 }
 
-/**
- * The model is asked to copy the frontmatter verbatim, but frontmatter carries
- * the canonical URL and hash, so it must be exact. If it is missing or altered,
- * restore it deterministically with a patch action and keep the model's body.
- */
+/** Frontmatter must be exact; restore it if the model altered it. */
 async function ensureFrontmatter(
   documentId: string,
   markdown: string | undefined,
