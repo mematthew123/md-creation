@@ -17,3 +17,9 @@ export const writeClient = createClient({
   ...base,
   token: process.env.SANITY_API_WRITE_TOKEN,
 });
+
+/**
+ * Agent Actions (generate / patch) require the experimental `vX` API version.
+ * Same write token; used by the ingest run to create and update Markdown Pages.
+ */
+export const agentClient = writeClient.withConfig({ apiVersion: "vX" });

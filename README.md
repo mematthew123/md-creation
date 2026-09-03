@@ -29,8 +29,10 @@ Run a script in one workspace with `npm run <script> --workspace <name>`, e.g.
 ## Markdown for agents
 
 Every page in `web/` is a Source Page listed in `web/app/sitemap.ts`. An Ingest Run
-reads that sitemap, converts each page's main content to markdown and publishes it as
-a `markdownPage` document in Sanity. See [CONTEXT.md](CONTEXT.md) for the vocabulary
+reads that sitemap, extracts each page's main content and hands it to **Sanity Agent
+Actions**, which generate the markdown and write the published `markdownPage` document
+(see [ADR 0002](docs/adr/0002-agent-actions-as-markdown-writer.md); `main` uses a
+deterministic turndown converter instead). See [CONTEXT.md](CONTEXT.md) for the vocabulary
 and [docs/adr](docs/adr) for decisions.
 
 | URL | What you get |
@@ -43,7 +45,8 @@ and [docs/adr](docs/adr) for decisions.
 ### Setup
 
 1. Copy `web/.env.example` to `web/.env.local` and fill it in (Sanity Editor token,
-   `INGEST_SECRET`, Vercel webhook secret and project id, `NEXT_PUBLIC_SITE_URL`).
+   `INGEST_SECRET`, Vercel webhook secret and project id, `NEXT_PUBLIC_SITE_URL`,
+   `SANITY_SCHEMA_ID` from `npx sanity schema list`).
 2. Deploy the schema: `cd studio && npx sanity@latest schema deploy`.
 3. Run the web app (`npm run dev`). The ingest fetches its own pages, so the app must be up.
 
