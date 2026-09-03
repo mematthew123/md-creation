@@ -1,7 +1,39 @@
 {
   "name": "md-studio",
-  "version": "0.1.0",
   "private": true,
-  "description": "Placeholder for the Sanity Studio workspace. Replace by running `npm create sanity@latest` inside this directory.",
-  "scripts": {}
+  "version": "0.1.0",
+  "main": "package.json",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity start",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "deploy-graphql": "sanity graphql deploy",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "sanity"
+  ],
+  "dependencies": {
+    "@sanity/vision": "^6.12.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sanity": "^6.12.0",
+    "styled-components": "^6.1.18"
+  },
+  "devDependencies": {
+    "@sanity/eslint-config-studio": "^7",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.8.1",
+    "prettier": "^3.5",
+    "typescript": "^5.8"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "printWidth": 100,
+    "semi": false,
+    "singleQuote": true
+  }
 }
