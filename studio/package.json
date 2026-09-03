@@ -1,0 +1,7 @@
+{
+  "name": "md-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Placeholder for the Sanity Studio workspace. Replace by running `npm create sanity@latest` inside this directory.",
+  "scripts": {}
+}
