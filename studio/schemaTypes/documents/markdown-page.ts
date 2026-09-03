@@ -1,0 +1,73 @@
+import {defineField, defineType} from 'sanity'
+import {DocumentTextIcon} from '@sanity/icons/DocumentText'
+
+/**
+ * A Markdown Page is the stored markdown representation of one Source Page.
+ * It is machine-owned: the ingest run creates, updates and deletes these
+ * documents, so every field is read-only in the Studio.
+ */
+export const markdownPage = defineType({
+  name: 'markdownPage',
+  title: 'Markdown Page',
+  type: 'document',
+  icon: DocumentTextIcon,
+  description: 'Machine-owned. Written by the ingest run; manual edits are overwritten.',
+  readOnly: true,
+  fields: [
+    defineField({
+      name: 'title',
+      type: 'string',
+      readOnly: true,
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'description',
+      type: 'text',
+      rows: 2,
+      readOnly: true,
+    }),
+    defineField({
+      name: 'path',
+      type: 'string',
+      description: 'Natural key: the site path of the Source Page, e.g. "/about".',
+      readOnly: true,
+      validation: (rule) =>
+        rule.required().regex(/^\/(?!.*\.md$)\S*$/, {name: 'site path', invert: false}),
+    }),
+    defineField({
+      name: 'sourceUrl',
+      type: 'url',
+      readOnly: true,
+    }),
+    defineField({
+      name: 'markdown',
+      type: 'text',
+      rows: 30,
+      readOnly: true,
+    }),
+    defineField({
+      name: 'sourceHash',
+      type: 'string',
+      description: 'Fingerprint of the Source Page content; unchanged pages are skipped.',
+      readOnly: true,
+    }),
+    defineField({
+      name: 'ingestedAt',
+      type: 'datetime',
+      readOnly: true,
+    }),
+  ],
+  orderings: [{title: 'Path', name: 'path', by: [{field: 'path', direction: 'asc'}]}],
+  preview: {
+    select: {path: 'path', title: 'title', ingestedAt: 'ingestedAt'},
+    prepare({path, title, ingestedAt}) {
+      const when = ingestedAt
+        ? `ingested ${new Date(ingestedAt).toLocaleString()}`
+        : 'never ingested'
+      return {
+        title: path ?? '(no path)',
+        subtitle: [title, when].filter(Boolean).join(' · '),
+      }
+    },
+  },
+})
