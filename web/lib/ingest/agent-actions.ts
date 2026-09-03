@@ -15,6 +15,13 @@ import { agentClient } from "@/lib/sanity/client";
  */
 export const SCHEMA_ID = process.env.SANITY_SCHEMA_ID ?? "_.schemas.default";
 
+/**
+ * Metadata fields are `readOnly: () => true` in the schema (locked in the
+ * Studio). Agent Actions skip conditional read-only fields unless the request
+ * opts back in, which is what this does.
+ */
+const CONDITIONAL_PATHS = { defaultReadOnly: false, defaultHidden: false } as const;
+
 export type MarkdownPageMetadata = {
   title: string;
   description: string;
@@ -72,6 +79,7 @@ export async function createMarkdownPage(input: ConvertInput): Promise<ConvertRe
   >({
     schemaId: SCHEMA_ID,
     forcePublishedWrite: true,
+    conditionalPaths: CONDITIONAL_PATHS,
     targetDocument: {
       operation: "create",
       _type: "markdownPage",
@@ -99,6 +107,7 @@ export async function updateMarkdownPage(
     schemaId: SCHEMA_ID,
     documentId,
     forcePublishedWrite: true,
+    conditionalPaths: CONDITIONAL_PATHS,
     target: (Object.keys(input.metadata) as (keyof MarkdownPageMetadata)[]).map((key) => ({
       operation: "set" as const,
       path: key,
@@ -110,6 +119,7 @@ export async function updateMarkdownPage(
     schemaId: SCHEMA_ID,
     documentId,
     forcePublishedWrite: true,
+    conditionalPaths: CONDITIONAL_PATHS,
     target: { path: "markdown" },
     temperature: 0,
     instruction: CONVERT_INSTRUCTION,
@@ -143,6 +153,7 @@ async function ensureFrontmatter(
     schemaId: SCHEMA_ID,
     documentId,
     forcePublishedWrite: true,
+    conditionalPaths: CONDITIONAL_PATHS,
     target: { operation: "set", path: "markdown", value: `${expected}\n\n${body.trim()}\n` },
   });
   return true;

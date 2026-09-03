@@ -4,9 +4,10 @@ import {DocumentTextIcon} from '@sanity/icons/DocumentText'
 /**
  * A Markdown Page is the stored markdown representation of one Source Page.
  * It is machine-owned: the ingest run creates, updates and deletes these
- * documents through Sanity Agent Actions. Metadata fields are read-only in
- * the Studio; `markdown` must stay writable because Agent Actions refuse to
- * write to fields (or documents) marked readOnly: true.
+ * documents through Sanity Agent Actions. Agent Actions refuse to write to
+ * fields marked `readOnly: true`, so the metadata fields use the conditional
+ * form `readOnly: () => true`: still locked in the Studio, but the ingest can
+ * opt back in per request with `conditionalPaths`. `markdown` stays writable.
  */
 export const markdownPage = defineType({
   name: 'markdownPage',
@@ -18,27 +19,27 @@ export const markdownPage = defineType({
     defineField({
       name: 'title',
       type: 'string',
-      readOnly: true,
+      readOnly: () => true,
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'description',
       type: 'text',
       rows: 2,
-      readOnly: true,
+      readOnly: () => true,
     }),
     defineField({
       name: 'path',
       type: 'string',
       description: 'Natural key: the site path of the Source Page, e.g. "/about".',
-      readOnly: true,
+      readOnly: () => true,
       validation: (rule) =>
         rule.required().regex(/^\/(?!.*\.md$)\S*$/, {name: 'site path', invert: false}),
     }),
     defineField({
       name: 'sourceUrl',
       type: 'url',
-      readOnly: true,
+      readOnly: () => true,
     }),
     defineField({
       name: 'markdown',
@@ -50,12 +51,12 @@ export const markdownPage = defineType({
       name: 'sourceHash',
       type: 'string',
       description: 'Fingerprint of the Source Page content; unchanged pages are skipped.',
-      readOnly: true,
+      readOnly: () => true,
     }),
     defineField({
       name: 'ingestedAt',
       type: 'datetime',
-      readOnly: true,
+      readOnly: () => true,
     }),
   ],
   orderings: [{title: 'Path', name: 'path', by: [{field: 'path', direction: 'asc'}]}],
